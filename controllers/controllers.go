@@ -31,9 +31,17 @@ func HashedPassword(password string) string {
 	}
 	return string(bytes)
 }
-func VerfyPassword(userPassword string, givenPassword string) (bool string) {
-
+func VerfyPassword(userPassword string, givenPassword string) (bool, string) {
+	err := bcrypt.CompareHashAndPassword([]byte(givenPassword),[]byte(userPassword))
+	valid := true
+	msg := ""
+	if err != nil{
+		msg = "login or passsword is incorrect"
+		valid = false
+	}
+	return valid, msg
 }
+
 func SignUp() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
