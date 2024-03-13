@@ -110,7 +110,7 @@ func Login() gin.HandlerFunc {
 		token, referesh_token, _ := generate.TokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, *founduser.User_ID)
 		defer cancel()
 		generate.UpdateAllTokens(token, referesh_token, founduser.User_ID)
-		
+			
 		c.JSON(http.StatusFound, founduser)
 
 	}
