@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -20,7 +19,7 @@ import (
 
 var (
 	UserCollection    *mongo.Collection = database.UserData(database.Client, "Users")
-	ProdcutCollection *mongo.Collection = database.ProductData(database.Client, "Products")
+	ProductCollection *mongo.Collection = database.ProductData(database.Client, "Products")
 	Validate                            = validator.New()
 )
 
@@ -32,10 +31,10 @@ func HashedPassword(password string) string {
 	return string(bytes)
 }
 func VerfyPassword(userPassword string, givenPassword string) (bool, string) {
-	err := bcrypt.CompareHashAndPassword([]byte(givenPassword),[]byte(userPassword))
+	err := bcrypt.CompareHashAndPassword([]byte(givenPassword), []byte(userPassword))
 	valid := true
 	msg := ""
-	if err != nil{
+	if err != nil {
 		msg = "login or passsword is incorrect"
 		valid = false
 	}
@@ -139,11 +138,35 @@ func Login() gin.HandlerFunc {
 	}
 }
 func ProductViewAdmin() gin.HandlerFunc {
-
+	return func(ctx *gin.Context) {}
 }
 func SearchProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var productList []models.Product
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		cursor, err := ProductCollection.Find(ctx, bson.D{{}})
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "something went wrong , please try after some time")
+			return
+		}
+		err = cursor.All(ctx, &productList)
+		if err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		defer cursor.Close(ctx)
+		if err := cursor.Err(); err != nil {
+			log.Println(err)
+			c.IndentedJSON(400, "Invalid")
+			return
+		}
+		defer cancel()
+		c.IndentedJSON(200,productList)
+	}
 
 }
 func SearchProductByQuery() gin.HandlerFunc {
-
+	return func(ctx *gin.Context) {}
 }
