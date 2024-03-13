@@ -1,20 +1,35 @@
 package controllers
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/abefiker/go_gin_ecommerce/database"
 	"github.com/abefiker/go_gin_ecommerce/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	userCollection    *mongo.Collection = database.UserData(database.Client, "Users")
+	prodcutCollection *mongo.Collection = database.ProductData(database.Client, "Products")
+	Validate                            = validator.New()
 )
 
 func HashedPassword(password string) string {
-
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		log.Panic(err)
+	}
+	return string(bytes)
 }
 func VerfyPassword(userPassword string, givenPassword string) (bool string) {
 
@@ -110,7 +125,7 @@ func Login() gin.HandlerFunc {
 		token, referesh_token, _ := generate.TokenGenerator(*founduser.Email, *founduser.First_Name, *founduser.Last_Name, *founduser.User_ID)
 		defer cancel()
 		generate.UpdateAllTokens(token, referesh_token, founduser.User_ID)
-			
+
 		c.JSON(http.StatusFound, founduser)
 
 	}
