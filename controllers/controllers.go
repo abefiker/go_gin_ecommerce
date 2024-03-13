@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	userCollection    *mongo.Collection = database.UserData(database.Client, "Users")
-	prodcutCollection *mongo.Collection = database.ProductData(database.Client, "Products")
+	UserCollection    *mongo.Collection = database.UserData(database.Client, "Users")
+	ProdcutCollection *mongo.Collection = database.ProductData(database.Client, "Products")
 	Validate                            = validator.New()
 )
 
